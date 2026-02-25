@@ -9,7 +9,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 
 interface Preferences {
@@ -101,7 +101,7 @@ export default function Command() {
 
   let chapters: Chapter[] = [];
   if (data) {
-    chapters = isVedic ? data : data; // The Vedic API returns an array directly.
+    chapters = data;
   }
 
   return (
@@ -111,11 +111,20 @@ export default function Command() {
           ? `Chapter ${ch.chapter_number}: ${ch.name}`
           : `Chapter ${ch.chapter_number}: ${ch.name_meaning}`;
 
+        const subtitle = isVedic
+          ? `${ch.translation || ""} • ${ch.verses_count} Verses`
+          : `${ch.verses_count} Verses`;
+
+        const keywords = isVedic
+          ? [ch.name, ch.translation, ch.meaning?.en, ch.meaning?.hi].filter(Boolean) as string[]
+          : [ch.name_meaning];
+
         return (
           <List.Item
             key={ch.chapter_number}
             title={title}
-            subtitle={`${ch.verses_count} Verses`}
+            subtitle={subtitle}
+            keywords={keywords}
             icon={{ source: Icon.Book, tintColor: themeColor }}
             actions={
               <ActionPanel>
@@ -133,6 +142,13 @@ export default function Command() {
           />
         );
       })}
+      {!isLoading && chapters.length === 0 && (
+        <List.EmptyView
+          title="No chapters found"
+          description={!isVedic && !preferences.apiKey ? "Please set your RapidAPI key in preferences or switch to Vedic Scriptures source." : "Try a different search term"}
+          icon={Icon.MagnifyingGlass}
+        />
+      )}
     </List>
   );
 }
@@ -168,7 +184,7 @@ function VersesList({
 
   // Load verses concurrently for Vedic API (which requires verse-by-verse fetch)
   // Or fetch single chapter array for RapidAPI
-  useState(() => {
+  useEffect(() => {
     const fetchVerses = async () => {
       try {
         if (isVedic) {
@@ -185,7 +201,7 @@ function VersesList({
             chapter: v.chapter,
             verse: v.verse,
             sanskrit: v.slok,
-            translation: v.siva?.et || v.tej?.ht || "Translation not available",
+            translation: v.siva?.et || v.tej?.ht || v.adi?.et || v.gambir?.et || "Translation not available",
           }));
           setVerses(formatted);
         } else {
@@ -225,7 +241,7 @@ function VersesList({
     };
 
     fetchVerses();
-  });
+  }, [chapterNumber, versesCount, isVedic, preferences.apiKey]);
 
   return (
     <List
@@ -236,13 +252,15 @@ function VersesList({
       {verses.map((v) => (
         <List.Item
           key={`${v.chapter}-${v.verse}`}
-          title={`Verse ${v.verse}`}
+          title={`Verse ${v.verse} - ${v.translation.replace(/^[\d\.]+\s*/, '')}`}
+          subtitle=""
+          keywords={[v.translation, v.sanskrit]}
           icon={{ source: Icon.TextDocument, tintColor: themeColor }}
           detail={
             <List.Item.Detail
               markdown={`## Chapter ${v.chapter}, Verse ${v.verse}\n\n---\n\n${preferences.showSanskrit
-                  ? `### Sanskrit\n\n\`\`\`text\n${v.sanskrit}\n\`\`\`\n\n---\n\n`
-                  : ""
+                ? `### Sanskrit\n\n\`\`\`text\n${v.sanskrit}\n\`\`\`\n\n---\n\n`
+                : ""
                 }### Translation\n\n${v.translation}`}
             />
           }

@@ -55,6 +55,31 @@
       "description": "Display original Sanskrit verses when available",
       "default": true,
       "label": "Show Sanskrit verses"
+    },
+    {
+      "name": "apiSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "API Source",
+      "description": "Select the source for Bhagavad Gita data",
+      "default": "vedic",
+      "data": [
+        {
+          "title": "Vedic Scriptures (No API Key Required)",
+          "value": "vedic"
+        },
+        {
+          "title": "RapidAPI (API Key Required)",
+          "value": "gita"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "RapidAPI Key",
+      "description": "Required only if using RapidAPI source"
     }
   ],
   "dependencies": {
