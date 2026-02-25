@@ -5,5 +5,5 @@ A Raycast extension that lets you read and search through quotes from the Bhagav
 ## Features
 - Browse verses categorized by chapter
 - View translations and original Sanskrit slokas (optional)
-- Search for specific keywords or concepts
+- Search for specific keywords within chapters
 - Customizable theme color
