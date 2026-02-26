@@ -7,10 +7,12 @@ import {
   Action,
   Toast,
   showToast,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
+import { AIExplanation } from "./components/AIExplanation";
 
 interface Preferences {
   colorScheme: "blue" | "green" | "purple" | "orange" | "red";
@@ -94,6 +96,11 @@ export default function Command() {
         <List.EmptyView
           title="Error fetching data. Check preferences!"
           icon={Icon.ExclamationMark}
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
         />
       </List>
     );
@@ -137,6 +144,17 @@ export default function Command() {
                     />
                   }
                 />
+                <Action.Push
+                  title="Summarize Chapter with AI"
+                  icon={Icon.Stars}
+                  target={
+                    <AIExplanation
+                      title={`Chapter ${ch.chapter_number} Summary`}
+                      prompt={`Summarize the key themes and lessons from Chapter ${ch.chapter_number} of the Bhagavad Gita.`}
+                    />
+                  }
+                />
+                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />
@@ -147,6 +165,11 @@ export default function Command() {
           title="No chapters found"
           description={!isVedic && !preferences.apiKey ? "Please set your RapidAPI key in preferences or switch to Vedic Scriptures source." : "Try a different search term"}
           icon={Icon.MagnifyingGlass}
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
         />
       )}
     </List>
@@ -259,7 +282,7 @@ function VersesList({
           detail={
             <List.Item.Detail
               markdown={`## Chapter ${v.chapter}, Verse ${v.verse}\n\n---\n\n${preferences.showSanskrit
-                ? `### Sanskrit\n\n\`\`\`text\n${v.sanskrit}\n\`\`\`\n\n---\n\n`
+                ? `### Sanskrit\n\n> **${v.sanskrit.replace(/\\n/g, '**  \n> **')}**\n\n---\n\n`
                 : ""
                 }### Translation\n\n${v.translation}`}
             />
@@ -276,6 +299,17 @@ function VersesList({
                   content={`${v.sanskrit}\n- Bhagavad Gita ${v.chapter}:${v.verse}`}
                 />
               )}
+              <Action.Push
+                title="Explain Verse with AI"
+                icon={Icon.Stars}
+                target={
+                  <AIExplanation
+                    title={`Chapter ${v.chapter}, Verse ${v.verse} Explanation`}
+                    prompt={`Provide a philosophical explanation and practical modern-day application of this Bhagavad Gita verse (Chapter ${v.chapter}, Verse ${v.verse}): "${v.translation}"`}
+                  />
+                }
+              />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
