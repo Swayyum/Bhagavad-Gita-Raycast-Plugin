@@ -1,9 +1,25 @@
 # Bhagavad Gita Quotes
 
-A Raycast extension that lets you read and search through quotes from the Bhagavad Gita.
+A Raycast extension that lets you read, search, and understand quotes from the Bhagavad Gita directly from your launcher.
 
 ## Features
-- Browse verses categorized by chapter
-- View translations and original Sanskrit slokas (optional)
-- Search for specific keywords within chapters
-- Customizable theme color
+
+- **Read & Browse**: Navigate through all 18 chapters and their respective verses.
+- **Search**: Find specific keywords within chapters and verses.
+- **Sanskrit Verses**: View original Sanskrit slokas alongside translations (can be toggled in preferences).
+- **Multiple Data Sources**: Choose between the free Vedic Scriptures API or the RapidAPI Bhagavad Gita API.
+- **AI Integrations**: Use Raycast AI to:
+  - Summarize chapters in your preferred language.
+  - Philosophically explain verses and discuss modern-day applications.
+  - Translate verses directly into your preferred language.
+- **Customization**: 
+  - Choose your preferred target language for AI features.
+  - Customize the theme color of the extension's icons.
+
+## Preferences
+
+- **Color Scheme**: Choose the theme color for icons (Blue, Green, Purple, Orange, Red). Default is Orange.
+- **Show Sanskrit**: Determine whether or not the original Sanskrit verses are displayed.
+- **API Source**: Pick between the Vedic Scriptures (no API key required) or RapidAPI (API key required).
+- **RapidAPI Key**: Provide your API key if you opted for the RapidAPI source.
+- **AI Target Language**: Select the target language for AI-generated summaries, translations, and explanations (supports English, Spanish, French, German, Italian, Hindi, and more).
