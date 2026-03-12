@@ -329,7 +329,7 @@ function VersesList({
                 target={
                   <AIExplanation
                     title={`Chapter ${v.chapter}, Verse ${v.verse} Explanation`}
-                    prompt={`Provide a philosophical explanation and practical modern-day application of this Bhagavad Gita verse (Chapter ${v.chapter}, Verse ${v.verse}): "${v.translation}". Please provide your response in ${preferences.translationLanguage}.`}
+                    prompt={`Provide a philosophical explanation and practical modern-day application of this Bhagavad Gita verse (Chapter ${v.chapter}, Verse ${v.verse}, Sanskrit: "${v.sanskrit}"). Please provide your response in ${preferences.translationLanguage}.`}
                   />
                 }
               />
@@ -340,7 +340,7 @@ function VersesList({
                 target={
                   <AIExplanation
                     title={`Chapter ${v.chapter}, Verse ${v.verse} Translation`}
-                    prompt={`Translate this Bhagavad Gita verse (Sanskrit: "${v.sanskrit}", English: "${v.translation}") into ${preferences.translationLanguage}. Provide the direct translation first, followed by a brief textual meaning in ${preferences.translationLanguage}.`}
+                    prompt={`Translate this Bhagavad Gita verse directly from Sanskrit into ${preferences.translationLanguage}: "${v.sanskrit}". Provide the direct translation first, followed by a brief textual meaning in ${preferences.translationLanguage}.`}
                   />
                 }
               />
