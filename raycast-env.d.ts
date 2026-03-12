@@ -15,7 +15,9 @@ type ExtensionPreferences = {
   /** API Source - Select the source for Bhagavad Gita data */
   "apiSource": "vedic" | "gita",
   /** RapidAPI Key - Required only if using RapidAPI source */
-  "apiKey"?: string
+  "apiKey"?: string,
+  /** AI Target Language - Select the language for AI translations and explanations */
+  "translationLanguage": "English" | "Spanish" | "French" | "German" | "Italian" | "Portuguese" | "Russian" | "Chinese" | "Japanese" | "Korean" | "Hindi" | "Arabic" | "Dutch" | "Turkish"
 }
 
 /** Preferences accessible in all the extension's commands */
@@ -24,14 +26,10 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `index` command */
   export type Index = ExtensionPreferences & {}
-  /** Preferences accessible in the `ask-gita` command */
-  export type AskGita = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
   /** Arguments passed to the `index` command */
   export type Index = {}
-  /** Arguments passed to the `ask-gita` command */
-  export type AskGita = {}
 }
 

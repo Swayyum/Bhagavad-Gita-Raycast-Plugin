@@ -14,13 +14,6 @@
       "subtitle": "Bhagavad Gita",
       "description": "Read and search quotes from the Bhagavad Gita",
       "mode": "view"
-    },
-    {
-      "name": "ask-gita",
-      "title": "Ask Gita (AI Test)",
-      "subtitle": "Bhagavad Gita",
-      "description": "Test AI.ask — suggests 5 jazz songs and copies to clipboard",
-      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -87,6 +80,30 @@
       "required": false,
       "title": "RapidAPI Key",
       "description": "Required only if using RapidAPI source"
+    },
+    {
+      "name": "translationLanguage",
+      "type": "dropdown",
+      "required": false,
+      "title": "AI Target Language",
+      "description": "Select the language for AI translations and explanations",
+      "default": "English",
+      "data": [
+        { "title": "English", "value": "English" },
+        { "title": "Spanish", "value": "Spanish" },
+        { "title": "French", "value": "French" },
+        { "title": "German", "value": "German" },
+        { "title": "Italian", "value": "Italian" },
+        { "title": "Portuguese", "value": "Portuguese" },
+        { "title": "Russian", "value": "Russian" },
+        { "title": "Chinese", "value": "Chinese" },
+        { "title": "Japanese", "value": "Japanese" },
+        { "title": "Korean", "value": "Korean" },
+        { "title": "Hindi", "value": "Hindi" },
+        { "title": "Arabic", "value": "Arabic" },
+        { "title": "Dutch", "value": "Dutch" },
+        { "title": "Turkish", "value": "Turkish" }
+      ]
     }
   ],
   "dependencies": {

@@ -19,6 +19,7 @@ interface Preferences {
   showSanskrit: boolean;
   apiSource: "vedic" | "gita";
   apiKey?: string;
+  translationLanguage: string;
 }
 
 interface Chapter {
@@ -66,9 +67,9 @@ export default function Command() {
   const apiHeaders: Record<string, string> = isVedic
     ? {}
     : {
-      "X-RapidAPI-Key": preferences.apiKey || "",
-      "X-RapidAPI-Host": "bhagavad-gita3.p.rapidapi.com",
-    };
+        "X-RapidAPI-Key": preferences.apiKey || "",
+        "X-RapidAPI-Host": "bhagavad-gita3.p.rapidapi.com",
+      };
 
   const options = {
     headers: apiHeaders,
@@ -98,7 +99,10 @@ export default function Command() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <Action
+                title="Open Extension Preferences"
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />
@@ -123,7 +127,9 @@ export default function Command() {
           : `${ch.verses_count} Verses`;
 
         const keywords = isVedic
-          ? [ch.name, ch.translation, ch.meaning?.en, ch.meaning?.hi].filter(Boolean) as string[]
+          ? ([ch.name, ch.translation, ch.meaning?.en, ch.meaning?.hi].filter(
+              Boolean,
+            ) as string[])
           : [ch.name_meaning];
 
         return (
@@ -145,16 +151,20 @@ export default function Command() {
                   }
                 />
                 <Action.Push
-                  title="Summarize Chapter with AI"
+                  title={`Summarize in ${preferences.translationLanguage}`}
                   icon={Icon.Stars}
+                  shortcut={{ modifiers: ["cmd"], key: "s" }}
                   target={
                     <AIExplanation
                       title={`Chapter ${ch.chapter_number} Summary`}
-                      prompt={`Summarize the key themes and lessons from Chapter ${ch.chapter_number} of the Bhagavad Gita.`}
+                      prompt={`Summarize the key themes and lessons from Chapter ${ch.chapter_number} of the Bhagavad Gita. Please provide your response in ${preferences.translationLanguage}.`}
                     />
                   }
                 />
-                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+                <Action
+                  title="Open Extension Preferences"
+                  onAction={openExtensionPreferences}
+                />
               </ActionPanel>
             }
           />
@@ -163,11 +173,18 @@ export default function Command() {
       {!isLoading && chapters.length === 0 && (
         <List.EmptyView
           title="No chapters found"
-          description={!isVedic && !preferences.apiKey ? "Please set your RapidAPI key in preferences or switch to Vedic Scriptures source." : "Try a different search term"}
+          description={
+            !isVedic && !preferences.apiKey
+              ? "Please set your RapidAPI key in preferences or switch to Vedic Scriptures source."
+              : "Try a different search term"
+          }
           icon={Icon.MagnifyingGlass}
           actions={
             <ActionPanel>
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <Action
+                title="Open Extension Preferences"
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />
@@ -224,7 +241,12 @@ function VersesList({
             chapter: v.chapter,
             verse: v.verse,
             sanskrit: v.slok,
-            translation: v.siva?.et || v.tej?.ht || v.adi?.et || v.gambir?.et || "Translation not available",
+            translation:
+              v.siva?.et ||
+              v.tej?.ht ||
+              v.adi?.et ||
+              v.gambir?.et ||
+              "Translation not available",
           }));
           setVerses(formatted);
         } else {
@@ -275,16 +297,17 @@ function VersesList({
       {verses.map((v) => (
         <List.Item
           key={`${v.chapter}-${v.verse}`}
-          title={`Verse ${v.verse} - ${v.translation.replace(/^[\d\.]+\s*/, '')}`}
+          title={`Verse ${v.verse} - ${v.translation.replace(/^[\d\.]+\s*/, "")}`}
           subtitle=""
           keywords={[v.translation, v.sanskrit]}
           icon={{ source: Icon.TextDocument, tintColor: themeColor }}
           detail={
             <List.Item.Detail
-              markdown={`## Chapter ${v.chapter}, Verse ${v.verse}\n\n---\n\n${preferences.showSanskrit
-                ? `### Sanskrit\n\n> **${v.sanskrit.replace(/\\n/g, '**  \n> **')}**\n\n---\n\n`
-                : ""
-                }### Translation\n\n${v.translation}`}
+              markdown={`## Chapter ${v.chapter}, Verse ${v.verse}\n\n---\n\n${
+                preferences.showSanskrit
+                  ? `### Sanskrit\n\n> **${v.sanskrit.replace(/\\n/g, "**  \n> **")}**\n\n---\n\n`
+                  : ""
+              }### Translation\n\n${v.translation}`}
             />
           }
           actions={
@@ -300,16 +323,31 @@ function VersesList({
                 />
               )}
               <Action.Push
-                title="Explain Verse with AI"
+                title={`Explain in ${preferences.translationLanguage}`}
                 icon={Icon.Stars}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
                 target={
                   <AIExplanation
                     title={`Chapter ${v.chapter}, Verse ${v.verse} Explanation`}
-                    prompt={`Provide a philosophical explanation and practical modern-day application of this Bhagavad Gita verse (Chapter ${v.chapter}, Verse ${v.verse}): "${v.translation}"`}
+                    prompt={`Provide a philosophical explanation and practical modern-day application of this Bhagavad Gita verse (Chapter ${v.chapter}, Verse ${v.verse}): "${v.translation}". Please provide your response in ${preferences.translationLanguage}.`}
                   />
                 }
               />
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <Action.Push
+                title={`Translate to ${preferences.translationLanguage}`}
+                icon={Icon.Message}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                target={
+                  <AIExplanation
+                    title={`Chapter ${v.chapter}, Verse ${v.verse} Translation`}
+                    prompt={`Translate this Bhagavad Gita verse (Sanskrit: "${v.sanskrit}", English: "${v.translation}") into ${preferences.translationLanguage}. Provide the direct translation first, followed by a brief textual meaning in ${preferences.translationLanguage}.`}
+                  />
+                }
+              />
+              <Action
+                title="Open Extension Preferences"
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />
