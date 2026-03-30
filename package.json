@@ -3,7 +3,7 @@
   "name": "bhagavad-gita-quotes",
   "title": "Bhagavad Gita Quotes",
   "version": "1.0.0",
-  "description": "Read and search through quotes from the Bhagavad Gita.",
+  "description": "Read and search Bhagavad Gita quotes (AI features require Raycast AI).",
   "icon": "command-icon.png",
   "author": "swayam_mehta",
   "license": "MIT",

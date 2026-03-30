@@ -143,11 +143,13 @@ export default function Command() {
     );
   }
 
-  const chapters = Array.isArray(data) ? data : [];
+  const chapters: Array<VedicChapter | RapidChapter> = Array.isArray(data)
+    ? (data as Array<VedicChapter | RapidChapter>)
+    : [];
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search chapters...">
-      {chapters.map((ch) => {
+      {chapters.map((ch: VedicChapter | RapidChapter) => {
         const title = isVedic
           ? `Chapter ${ch.chapter_number}: ${(ch as VedicChapter).name ?? ""}`
           : `Chapter ${ch.chapter_number}: ${(ch as RapidChapter).name_meaning ?? ""}`;
