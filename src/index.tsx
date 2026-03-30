@@ -22,15 +22,22 @@ interface Preferences {
   translationLanguage: string;
 }
 
-interface Chapter {
+interface VedicChapter {
   chapter_number: number;
   name?: string;
+  translation?: string;
   name_meaning?: string;
   verses_count: number;
-  summary?: {
-    en: string;
-    hi: string;
+  meaning?: {
+    en?: string;
+    hi?: string;
   };
+}
+
+interface RapidChapter {
+  chapter_number: number;
+  name_meaning?: string;
+  verses_count: number;
 }
 
 interface Verse {
@@ -38,6 +45,29 @@ interface Verse {
   verse: number;
   sanskrit: string;
   translation: string;
+}
+
+interface VedicSlokResponse {
+  chapter: number;
+  verse: number;
+  slok: string;
+  siva?: { et?: string };
+  tej?: { ht?: string };
+  adi?: { et?: string };
+  gambir?: { et?: string };
+}
+
+interface RapidVerseResponse {
+  chapter_number: number;
+  verse_number: number;
+  text: string;
+  translations?: Array<{ description?: string }>;
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "string") return err;
+  return "Unknown error";
 }
 
 export default function Command() {
@@ -79,17 +109,20 @@ export default function Command() {
     ? "https://vedicscriptures.github.io/chapters"
     : "https://bhagavad-gita3.p.rapidapi.com/v2/chapters/?limit=18";
 
-  const { isLoading, data, error } = useFetch<any>(url, {
-    ...options,
-    execute: isVedic || !!preferences.apiKey,
-    onError: (err) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch chapters",
-        message: err.message,
-      });
+  const { isLoading, data, error } = useFetch<VedicChapter[] | RapidChapter[]>(
+    url,
+    {
+      ...options,
+      execute: isVedic || !!preferences.apiKey,
+      onError: (err) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch chapters",
+          message: err.message,
+        });
+      },
     },
-  });
+  );
 
   if (error) {
     return (
@@ -110,27 +143,31 @@ export default function Command() {
     );
   }
 
-  let chapters: Chapter[] = [];
-  if (data) {
-    chapters = data;
-  }
+  const chapters = Array.isArray(data) ? data : [];
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search chapters...">
-      {chapters.map((ch: any) => {
+      {chapters.map((ch) => {
         const title = isVedic
-          ? `Chapter ${ch.chapter_number}: ${ch.name}`
-          : `Chapter ${ch.chapter_number}: ${ch.name_meaning}`;
+          ? `Chapter ${ch.chapter_number}: ${(ch as VedicChapter).name ?? ""}`
+          : `Chapter ${ch.chapter_number}: ${(ch as RapidChapter).name_meaning ?? ""}`;
 
         const subtitle = isVedic
-          ? `${ch.translation || ""} • ${ch.verses_count} Verses`
+          ? `${(ch as VedicChapter).translation ?? ""} • ${ch.verses_count} Verses`
           : `${ch.verses_count} Verses`;
 
         const keywords = isVedic
-          ? ([ch.name, ch.translation, ch.meaning?.en, ch.meaning?.hi].filter(
-              Boolean,
+          ? ([
+              (ch as VedicChapter).name,
+              (ch as VedicChapter).translation,
+              (ch as VedicChapter).meaning?.en,
+              (ch as VedicChapter).meaning?.hi,
+            ].filter(
+              (v): v is string => typeof v === "string" && v.length > 0,
             ) as string[])
-          : [ch.name_meaning];
+          : [(ch as RapidChapter).name_meaning].filter(
+              (v): v is string => typeof v === "string" && v.length > 0,
+            );
 
         return (
           <List.Item
@@ -228,7 +265,7 @@ function VersesList({
     const fetchVerses = async () => {
       try {
         if (isVedic) {
-          const promises = [];
+          const promises: Array<Promise<VedicSlokResponse>> = [];
           for (let i = 1; i <= versesCount; i++) {
             promises.push(
               fetch(
@@ -237,7 +274,7 @@ function VersesList({
             );
           }
           const results = await Promise.all(promises);
-          const formatted = results.map((v: any) => ({
+          const formatted: Verse[] = results.map((v) => ({
             chapter: v.chapter,
             verse: v.verse,
             sanskrit: v.slok,
@@ -265,20 +302,22 @@ function VersesList({
           const data = await response.json();
           // Map rapidapi data to Verse format
           if (Array.isArray(data)) {
-            const formatted = data.map((v: any) => ({
-              chapter: v.chapter_number,
-              verse: v.verse_number,
-              sanskrit: v.text,
-              translation: v.translations?.[0]?.description || "",
-            }));
+            const formatted: Verse[] = (data as RapidVerseResponse[]).map(
+              (v) => ({
+                chapter: v.chapter_number,
+                verse: v.verse_number,
+                sanskrit: v.text,
+                translation: v.translations?.[0]?.description || "",
+              }),
+            );
             setVerses(formatted);
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to fetch verses",
-          message: err.message,
+          message: getErrorMessage(err),
         });
       } finally {
         setIsLoading(false);
@@ -297,7 +336,7 @@ function VersesList({
       {verses.map((v) => (
         <List.Item
           key={`${v.chapter}-${v.verse}`}
-          title={`Verse ${v.verse} - ${v.translation.replace(/^[\d\.]+\s*/, "")}`}
+          title={`Verse ${v.verse} - ${v.translation.replace(/^[\d.]+\s*/, "")}`}
           subtitle=""
           keywords={[v.translation, v.sanskrit]}
           icon={{ source: Icon.TextDocument, tintColor: themeColor }}
@@ -305,7 +344,7 @@ function VersesList({
             <List.Item.Detail
               markdown={`## Chapter ${v.chapter}, Verse ${v.verse}\n\n---\n\n${
                 preferences.showSanskrit
-                  ? `### Sanskrit\n\n> **${v.sanskrit.replace(/\\n/g, "**  \n> **")}**\n\n---\n\n`
+                  ? `### Sanskrit\n\n> **${v.sanskrit.replace(/\n/g, "**  \n> **")}**\n\n---\n\n`
                   : ""
               }### Translation\n\n${v.translation}`}
             />

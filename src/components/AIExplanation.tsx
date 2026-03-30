@@ -15,6 +15,12 @@ interface AIExplanationProps {
   title: string;
 }
 
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "string") return err;
+  return "Unknown error";
+}
+
 export function AIExplanation({ prompt, title }: AIExplanationProps) {
   const [data, setData] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -33,9 +39,9 @@ export function AIExplanation({ prompt, title }: AIExplanationProps) {
       try {
         const answer = await AI.ask(prompt);
         setData(answer);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("AI Error:", err);
-        const msg = err.message || "Unknown error";
+        const msg = getErrorMessage(err);
         if (
           msg.includes("Model is not supported") ||
           msg.includes("Worker unloaded")
