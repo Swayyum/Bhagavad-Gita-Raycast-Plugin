@@ -5,6 +5,8 @@ import {
   Color,
   ActionPanel,
   Action,
+  AI,
+  environment,
   Toast,
   showToast,
   openExtensionPreferences,
@@ -74,6 +76,7 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const colorScheme = preferences.colorScheme;
   const isVedic = preferences.apiSource === "vedic";
+  const canUseAI = environment.canAccess(AI);
 
   const getThemeColor = (scheme: string) => {
     switch (scheme) {
@@ -189,17 +192,25 @@ export default function Command() {
                     />
                   }
                 />
-                <Action.Push
-                  title={`Summarize in ${preferences.translationLanguage}`}
-                  icon={Icon.Stars}
-                  shortcut={{ modifiers: ["cmd"], key: "s" }}
-                  target={
-                    <AIExplanation
-                      title={`Chapter ${ch.chapter_number} Summary`}
-                      prompt={`Summarize the key themes and lessons from Chapter ${ch.chapter_number} of the Bhagavad Gita. Please provide your response in ${preferences.translationLanguage}.`}
-                    />
-                  }
-                />
+                {canUseAI ? (
+                  <Action.Push
+                    title={`Summarize in ${preferences.translationLanguage}`}
+                    icon={Icon.Stars}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    target={
+                      <AIExplanation
+                        title={`Chapter ${ch.chapter_number} Summary`}
+                        prompt={`Summarize the key themes and lessons from Chapter ${ch.chapter_number} of the Bhagavad Gita. Please provide your response in ${preferences.translationLanguage}.`}
+                      />
+                    }
+                  />
+                ) : (
+                  <Action.OpenInBrowser
+                    title="Learn About Raycast AI"
+                    icon={Icon.Stars}
+                    url="https://www.raycast.com/pro"
+                  />
+                )}
                 <Action
                   title="Open Extension Preferences"
                   onAction={openExtensionPreferences}
@@ -241,6 +252,7 @@ function VersesList({
 }) {
   const preferences = getPreferenceValues<Preferences>();
   const isVedic = preferences.apiSource === "vedic";
+  const canUseAI = environment.canAccess(AI);
   const [verses, setVerses] = useState<Verse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -363,28 +375,38 @@ function VersesList({
                   content={`${v.sanskrit}\n- Bhagavad Gita ${v.chapter}:${v.verse}`}
                 />
               )}
-              <Action.Push
-                title={`Explain in ${preferences.translationLanguage}`}
-                icon={Icon.Stars}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-                target={
-                  <AIExplanation
-                    title={`Chapter ${v.chapter}, Verse ${v.verse} Explanation`}
-                    prompt={`Provide a philosophical explanation and practical modern-day application of this Bhagavad Gita verse (Chapter ${v.chapter}, Verse ${v.verse}, Sanskrit: "${v.sanskrit}"). Please provide your response in ${preferences.translationLanguage}.`}
+              {canUseAI ? (
+                <>
+                  <Action.Push
+                    title={`Explain in ${preferences.translationLanguage}`}
+                    icon={Icon.Stars}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    target={
+                      <AIExplanation
+                        title={`Chapter ${v.chapter}, Verse ${v.verse} Explanation`}
+                        prompt={`Provide a philosophical explanation and practical modern-day application of this Bhagavad Gita verse (Chapter ${v.chapter}, Verse ${v.verse}, Sanskrit: "${v.sanskrit}"). Please provide your response in ${preferences.translationLanguage}.`}
+                      />
+                    }
                   />
-                }
-              />
-              <Action.Push
-                title={`Translate to ${preferences.translationLanguage}`}
-                icon={Icon.Message}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
-                target={
-                  <AIExplanation
-                    title={`Chapter ${v.chapter}, Verse ${v.verse} Translation`}
-                    prompt={`Translate this Bhagavad Gita verse directly from Sanskrit into ${preferences.translationLanguage}: "${v.sanskrit}". Provide the direct translation first, followed by a brief textual meaning in ${preferences.translationLanguage}.`}
+                  <Action.Push
+                    title={`Translate to ${preferences.translationLanguage}`}
+                    icon={Icon.Message}
+                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    target={
+                      <AIExplanation
+                        title={`Chapter ${v.chapter}, Verse ${v.verse} Translation`}
+                        prompt={`Translate this Bhagavad Gita verse directly from Sanskrit into ${preferences.translationLanguage}: "${v.sanskrit}". Provide the direct translation first, followed by a brief textual meaning in ${preferences.translationLanguage}.`}
+                      />
+                    }
                   />
-                }
-              />
+                </>
+              ) : (
+                <Action.OpenInBrowser
+                  title="Learn About Raycast AI"
+                  icon={Icon.Stars}
+                  url="https://www.raycast.com/pro"
+                />
+              )}
               <Action
                 title="Open Extension Preferences"
                 onAction={openExtensionPreferences}
