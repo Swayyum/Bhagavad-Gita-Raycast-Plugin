@@ -134,6 +134,11 @@
     "verses"
   ],
   "categories": [
-    "Other"
+    "Other",
+    "Productivity"
+  ],
+  "platforms": [
+    "macos",
+    "windows"
   ]
 }
